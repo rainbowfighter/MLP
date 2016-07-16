@@ -145,3 +145,6 @@ if __name__ == '__main__':
     learn(network,samples)
     gc.collect()
     
+    
+    print("hello")
+    
