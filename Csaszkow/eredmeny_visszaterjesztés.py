@@ -115,11 +115,11 @@ if __name__ == '__main__':
     # Example 4 : Learning sin(x)
     # -------------------------------------------------------------------------
     print ("Learning the sin function")
-    network = MLP(2,20,20,1)
+    network = MLP(2,20,1)
     
     
     #---------------TRAINING SET---------------#
-    pontok_szama = 1000
+    pontok_szama = 100
     epochs = 1000000   
     training_set = np.zeros(pontok_szama, dtype=[('input',  float, 2), ('output', float, 1)])
     tr_col1 = np.zeros(pontok_szama)
@@ -127,8 +127,8 @@ if __name__ == '__main__':
     tr_col3 = np.zeros(pontok_szama)
     
     tr_col1 = np.linspace(-2*np.pi, 2*np.pi, pontok_szama)
-    tr_col3 = np.sin(tr_col1)
-    tr_col2[0] = 0
+    tr_col3 = 0.9*np.sin(tr_col1)
+    tr_col2[0] = 0.9*np.sin(tr_col1[0] + (tr_col1[0]-tr_col1[1]))
     i = 1
     while (i < tr_col1.shape[0]):
         tr_col2[i] = tr_col3[i-1]
@@ -146,11 +146,13 @@ if __name__ == '__main__':
     #---------------/LEARNING PHASE---------------#
     
     #---------------TESTING PHASE---------------#
-    test_set = np.zeros(pontok_szama, dtype=[('input',  float, 2), ('output', float, 1)])
-    ts_col1 = np.zeros(pontok_szama)
+    ts_col1 = np.hstack((np.linspace(-2*np.pi, 2*np.pi, pontok_szama), np.arange(tr_col1[-1] - (tr_col1[0]-tr_col1[1])*np.pi, 5*np.pi, -1*(tr_col1[0]-tr_col1[1]))))    
+    test_set = np.zeros(ts_col1.shape[0], dtype=[('input',  float, 2), ('output', float, 1)])
+    #ts_col1 = np.zeros(pontok_szama)
     
-    ts_col1 = np.linspace(-2*np.pi, 2*np.pi, pontok_szama)
-    test_set['input'][0] = (ts_col1[0], 0)
+    #ts_col1 = np.linspace(-2*np.pi, 2*np.pi, pontok_szama)
+    
+    test_set['input'][0] = (ts_col1[0], 0.9*np.sin(ts_col1[0] + (ts_col1[0]- ts_col1[1])))
     test_set['output'][0] = network.propagate_forward(test_set['input'][0])
     
     for i in range(1,ts_col1.shape[0]):
