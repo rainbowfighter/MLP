@@ -121,8 +121,13 @@ if __name__ == '__main__':
     
     
     #---------------TRAINING SET---------------#
+<<<<<<< Updated upstream
+    pontok_szama = 200
+    epochs = 1000000
+=======
     pontok_szama = 100
-    epochs = 10000000  
+    epochs = 100000  
+>>>>>>> Stashed changes
     training_set = np.zeros(pontok_szama*pontok_szama, dtype=[('input',  float, 2), 
                                                               ('output', float, 1)])
     tr_col = np.zeros(pontok_szama)
