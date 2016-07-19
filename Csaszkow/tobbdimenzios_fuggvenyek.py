@@ -12,7 +12,6 @@ import numpy as np
 import gc
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-import time
 
 
 def sigmoid(x):
@@ -122,8 +121,8 @@ if __name__ == '__main__':
     
     
     #---------------TRAINING SET---------------#
-    pontok_szama = 50
-    epochs = 10000  
+    pontok_szama = 100
+    epochs = 10000000  
     training_set = np.zeros(pontok_szama*pontok_szama, dtype=[('input',  float, 2), 
                                                               ('output', float, 1)])
     tr_col = np.zeros(pontok_szama)
@@ -158,7 +157,9 @@ if __name__ == '__main__':
     test_set['input'] = np.array(ts_temp)
     
     for i in range(test_set.shape[0]):    
-        test_set['output'][i] = network.propagate_forward(test_set['input'][i]) 
+        test_set['output'][i] = network.propagate_forward(test_set['input'][i])
+    
+    graph = test_set['output'].reshape(50,50)
      
     #---------------/TESTING PHASE---------------#    
     
@@ -166,16 +167,15 @@ if __name__ == '__main__':
     
     #Draw real function
     fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    X, Y = np.meshgrid(test_set['input'][:,0], test_set['input'][:,1])
-    Z = test_set['output']
-
-    surf = ax.plot_surface(X,Y,Z, cmap='autumn', cstride=2, rstride=2)
-    ax.set_xlabel("X-tengely")
-    ax.set_ylabel("Y-tengely")
-    ax.set_zlabel("Z-tengely")
-    ax.set_zlim(0, 2)
-
+    ax = fig.add_subplot(111,projection='3d')
+    X = tr_col
+    Y = tr_col
+    X, Y = np.meshgrid(X,Y)
+    Z = np.sin(X) + np.cos(Y)
+    line = ax.plot_surface(X, Y, Z, color='blue')
+    Z = graph
+    line = ax.plot_surface(X, Y, Z, color='red')
+    
     plt.show()
     
      #---------------/DISPLAY PHASE---------------#  
