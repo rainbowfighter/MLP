@@ -103,38 +103,42 @@ class MLP:
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    def learn(network,samples, epochs=1000000, lrate=.1, momentum=0.1):
+    def learn(network,samples, epochs=1000000, lrate=.0001, momentum=0.01):
         # Train 
         for i in range(epochs):
-            percent = (i/epochs)*100
-            if (percent%1 == 0):
-                print('learning: %d %%' % (percent))
             n = np.random.randint(samples.size)
             network.propagate_forward( samples['input'][n] )
-            network.propagate_backward( samples['output'][n], lrate, momentum )      
-        
+            err = network.propagate_backward( samples['output'][n], lrate, momentum )      
+            percent = (i/epochs)*100
+            if (percent%1 == 0):
+                print('learning: %.2d %% ' % (percent) + 'Error: %.5f' % err)
     
     # Example 4 : Learning sin(x) + cos(x2) function
     # -------------------------------------------------------------------------
     print ("Learning the sin(x1) + cos(x2) function")
-    network = MLP(2,20,1)
+    network = MLP(2,40,1)
     
     
     #---------------TRAINING SET---------------#
-    pontok_szama = 100
-    epochs = 10000000  
+    pontok_szama = 200
+    epochs = 1000000
     training_set = np.zeros(pontok_szama*pontok_szama, dtype=[('input',  float, 2), 
                                                               ('output', float, 1)])
     tr_col = np.zeros(pontok_szama)
     
     tr_col = np.linspace(-2*np.pi, 2*np.pi, pontok_szama)
+    
     tr_temp = []
     for i in range(tr_col.shape[0]):
         for j in range (tr_col.shape[0]):
             tr_temp.append([tr_col[i], tr_col[j]])
     training_set['input'] = np.array(tr_temp)
-    training_set['output'] = np.sin(training_set['input'][:,0]) + np.cos(training_set['input'][:,1])
+    training_set['output'] = (np.sin(training_set['input'][:,0]) + np.cos(training_set['input'][:,1]))/2.1
+    mean = np.mean(training_set['input'])
+    std = np.std(training_set['input'])
+    training_set['input'] = (training_set['input'] - mean)/std
     
+    #np.random.shuffle(training_set)
     #---------------/TRAINING SET---------------#
     
     #---------------LEARNING PHASE---------------#
@@ -145,10 +149,13 @@ if __name__ == '__main__':
     
     #---------------TESTING PHASE---------------#
     ts_col = np.zeros(pontok_szama*pontok_szama)
-    ts_col = np.linspace(-2*np.pi, 2*np.pi, pontok_szama) 
+    ts_col = np.linspace(-2*np.pi, 2*np.pi, pontok_szama)
+    mean = np.mean(ts_col)
+    std = np.std(ts_col)
+    ts_col = (ts_col - mean)/std
     
     test_set = np.zeros(pontok_szama*pontok_szama, dtype=[('input',  float, 2), 
-                                                          ('output', float, 1)])
+                                                         ('output', float, 1)])
                                                                                                        
     ts_temp = []
     for i in range(ts_col.shape[0]):
@@ -156,10 +163,9 @@ if __name__ == '__main__':
             ts_temp.append([ts_col[i], ts_col[j]])
     test_set['input'] = np.array(ts_temp)
     
-    for i in range(test_set.shape[0]):    
+    for i in range(test_set.shape[0]):
         test_set['output'][i] = network.propagate_forward(test_set['input'][i])
-    
-    graph = test_set['output'].reshape(50,50)
+    graph = test_set['output'].reshape(pontok_szama,pontok_szama)
      
     #---------------/TESTING PHASE---------------#    
     
@@ -171,7 +177,7 @@ if __name__ == '__main__':
     X = tr_col
     Y = tr_col
     X, Y = np.meshgrid(X,Y)
-    Z = np.sin(X) + np.cos(Y)
+    Z = training_set['output'].reshape(pontok_szama, pontok_szama)
     line = ax.plot_surface(X, Y, Z, color='blue')
     Z = graph
     line = ax.plot_surface(X, Y, Z, color='red')
