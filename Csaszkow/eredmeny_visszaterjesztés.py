@@ -119,20 +119,20 @@ if __name__ == '__main__':
     
     
     #---------------TRAINING SET---------------#
-    pontok_szama = 100
-    epochs = 1000000   
+    pontok_szama = 100000
+    epochs = 500000  
     training_set = np.zeros(pontok_szama, dtype=[('input',  float, 2), ('output', float, 1)])
     tr_col1 = np.zeros(pontok_szama)
     tr_col2 = np.zeros(pontok_szama)
     tr_col3 = np.zeros(pontok_szama)
     
-    tr_col1 = np.linspace(-2*np.pi, 2*np.pi, pontok_szama)
-    tr_col3 = 0.9*np.sin(tr_col1)
-    tr_col2[0] = 0.9*np.sin(tr_col1[0] + (tr_col1[0]-tr_col1[1]))
-    i = 1
-    while (i < tr_col1.shape[0]):
+    tr_col1 = np.linspace(-6*np.pi, 6*np.pi, pontok_szama)
+    tr_col3 = np.sin(tr_col1)
+    tr_col2[0] = 0
+
+    for i in range(1,tr_col1.size):
         tr_col2[i] = tr_col3[i-1]
-        i += 1
+
     
     for i in range(training_set.shape[0]):
         training_set['input'][i] = (tr_col1[i],tr_col2[i])
@@ -150,12 +150,13 @@ if __name__ == '__main__':
     test_set = np.zeros(ts_col1.shape[0], dtype=[('input',  float, 2), ('output', float, 1)])
     #ts_col1 = np.zeros(pontok_szama)
     
-    #ts_col1 = np.linspace(-2*np.pi, 2*np.pi, pontok_szama)
-    
-    test_set['input'][0] = (ts_col1[0], 0.9*np.sin(ts_col1[0] + (ts_col1[0]- ts_col1[1])))
+    ts_col1 = np.linspace(-6*np.pi, 10*np.pi, pontok_szama)
+    test_set['input'][0] = (ts_col1[0], 0)
     test_set['output'][0] = network.propagate_forward(test_set['input'][0])
+    temp_sine = np.sin(ts_col1)
     
-    for i in range(1,ts_col1.shape[0]):
+    for i in range(1,ts_col1.size):
+       #test_set['input'][i] = (ts_col1[i], temp_sine[i-1])
        test_set['input'][i] = (ts_col1[i], test_set['output'][i-1])
        test_set['output'][i] = network.propagate_forward(test_set['input'][i]) 
      
