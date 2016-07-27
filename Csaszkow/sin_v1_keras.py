@@ -1,10 +1,33 @@
 from keras.models import Sequential
-
-model = Sequential()
 from keras.layers.core import Dense, Activation
 from keras.callbacks import EarlyStopping
 from keras.callbacks import Callback
+import numpy as np
+import matplotlib.pyplot as plt
 
+#Callbacks for metrics
+class TrainingHistory(Callback):
+    def on_train_begin(self, logs={}):
+        self.losses = []
+        self.valid_losses = []
+        self.accs = []
+        self.valid_accs = []
+        self.epoch = 0
+
+    def on_epoch_end(self, epoch, logs={}):
+        if epoch % 1 == 0:
+            self.losses.append(logs.get('loss'))
+            self.valid_losses.append(logs.get('val_loss'))
+            self.accs.append(logs.get('acc'))
+            self.valid_accs.append(logs.get('val_acc'))
+            self.epoch += 1
+            
+            
+early_stopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
+history = TrainingHistory()
+
+#Create and set model
+model = Sequential()
 model.add(Dense(output_dim=5, input_dim=1))
 model.add(Activation("relu"))
 model.add(Dense(output_dim=5, input_dim=1))
@@ -14,63 +37,57 @@ model.add(Activation("relu"))
 model.add(Dense(output_dim=5, input_dim=1))
 model.add(Activation("relu"))
 model.add(Dense(output_dim=1))
-
-early_stopping = EarlyStopping(monitor='val_loss', patience=5, verbose=1)
-
-class TrainingHistory(Callback):
-    def on_train_begin(self, logs={}):
-        self.losses = []
-        self.valid_losses = []
-        self.predictions = []
-        self.i = 0
-        self.save_every = 50
-
-    def on_batch_end(self, batch, logs={}):
-        self.losses.append(logs.get('loss'))
-        self.i += 1        
-        if self.i % self.save_every == 0:        
-            pred = model.predict(data)
-            self.predictions.append(pred)
-            
-history = TrainingHistory()
-
-#Depth doesn't seem to work so well
-#Wide seems better for this task.
-#Of course what we're doing is incredibly stupid
-
 model.compile(loss='mean_squared_error', optimizer='sgd', metrics=['accuracy'])
 
-import numpy as np
-import matplotlib.pyplot as plt
 
-x = np.linspace(-np.pi, np.pi, 100)
+#Prepare training data
+tr_set = (np.random.random((10000))-.5) * 2 * np.pi
+tr_vals = np.sin(tr_set)
 
-data = (np.random.random((100000))-.5) * 2 * np.pi
-vals = np.sin(data)
 
-val_data = (np.random.random((100000))-.5) * 2 * np.pi
-val_vals = np.sin(data)
+#Prepare validation data
+val_set = (np.random.random((10000))-.5) * 2 * np.pi
+val_vals = np.sin(val_set)
 
-model.fit(data, 
-          vals, 
+#Prepare test data
+tst_set = np.linspace(-np.pi, np.pi, 100)
+test_vals = np.sin(tst_set)
+
+#Train model
+model.fit(tr_set, 
+          tr_vals, 
           batch_size=32, 
-          nb_epoch=100, 
+          nb_epoch=5, 
           verbose=1, 
-          validation_data=(val_data, val_vals), 
+          validation_data=(val_set, val_vals), 
           callbacks=[early_stopping, history], 
-          shuffle= True,
-          show_accuracy=True,)
+          shuffle= True)
 
+#Predict result
+pred_res = model.predict(tst_set, batch_size=32, verbose=0)
 
-y = model.predict(x, batch_size=32, verbose=0)
-plt.plot(x,y) 
-
-plt.plot(x,np.sin(x))
+#Viszualize prediction <--> expectation
+plt.figure(figsize=(10, 4))
+plt.title('Prediction')
+plt.plot(tst_set,pred_res) 
+plt.plot(tst_set,test_vals) 
 plt.show()
-#plt.legend()
-plt.figure(figsize=(6, 3))
-plt.plot(history.losses)
-plt.ylabel('error')
-plt.xlabel('iteration')
-plt.title('training error')
+
+#Viszualize losses
+plt.figure(figsize=(10, 4))
+plt.title('Loss curves')
+plt.plot(history.epoch, history.losses) 
+plt.plot(history.epoch, history.valid_losses) 
 plt.show()
+
+#Viszualize accuracies
+plt.figure(figsize=(10, 4))
+plt.title('Accuracy curves')
+plt.plot(history.epoch, history.accs) 
+plt.plot(history.epoch, history.valid_accs) 
+plt.show()
+
+
+#plt.ylabel('error')
+#plt.xlabel('iteration')
+#plt.title('training error')
