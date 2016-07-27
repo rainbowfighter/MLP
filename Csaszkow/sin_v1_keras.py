@@ -23,7 +23,7 @@ class TrainingHistory(Callback):
             self.epoch += 1
             
             
-early_stopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1)
+early_stopping = EarlyStopping(monitor='val_loss', patience=1, verbose=1)
 history = TrainingHistory()
 
 #Create and set model
@@ -57,7 +57,7 @@ test_vals = np.sin(tst_set)
 model.fit(tr_set, 
           tr_vals, 
           batch_size=32, 
-          nb_epoch=5, 
+          nb_epoch=100, 
           verbose=1, 
           validation_data=(val_set, val_vals), 
           callbacks=[early_stopping, history], 
@@ -76,15 +76,15 @@ plt.show()
 #Viszualize losses
 plt.figure(figsize=(10, 4))
 plt.title('Loss curves')
-plt.plot(history.epoch, history.losses) 
-plt.plot(history.epoch, history.valid_losses) 
+plt.plot(np.arange(history.epoch), history.losses) 
+plt.plot(np.arange(history.epoch), history.valid_losses) 
 plt.show()
 
 #Viszualize accuracies
 plt.figure(figsize=(10, 4))
 plt.title('Accuracy curves')
-plt.plot(history.epoch, history.accs) 
-plt.plot(history.epoch, history.valid_accs) 
+plt.plot(np.arange(history.epoch), history.accs) 
+plt.plot(np.arange(history.epoch), history.valid_accs) 
 plt.show()
 
 
