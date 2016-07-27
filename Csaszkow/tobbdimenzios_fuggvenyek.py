@@ -121,7 +121,7 @@ if __name__ == '__main__':
     
     #---------------TRAINING SET---------------#
     pontok_szama = 200
-    epochs = 1000000
+    epochs = 1000
     training_set = np.zeros(pontok_szama*pontok_szama, dtype=[('input',  float, 2), 
                                                               ('output', float, 1)])
     tr_col = np.zeros(pontok_szama)
