@@ -6,6 +6,7 @@ from keras.utils.np_utils import to_categorical
 from mpl_toolkits.mplot3d import Axes3D
 import gc
 from scipy.interpolate import griddata
+from keras.callbacks import EarlyStopping
 
 
 def count_error(arr1, arr2):
@@ -24,6 +25,11 @@ model.add(Activation("relu"))
 model.add(Dense(output_dim=5, input_dim=1))
 model.add(Activation("relu"))
 model.add(Dense(output_dim=1))
+
+
+early_stop = EarlyStopping(monitor='val_loss', patience=20, verbose=1)
+
+
 
 
 model.compile(loss='mean_squared_error', optimizer='sgd', metrics=['accuracy'])
@@ -50,7 +56,7 @@ for i in test_temp_exp:
 
 
 # train the model
-model.fit(data, labels, nb_epoch=5, batch_size=32)
+model.fit(data, labels, nb_epoch=50, batch_size=32, callbacks=[early_stop])
 
 #Test model
 test_result = model.predict(test, batch_size=32, verbose=0)
@@ -83,10 +89,10 @@ ax.scatter(X, Y, Z, c='b', marker='o')
 #ax.scatter(X, Y, Z, c='g', marker='o')
 
 difference_test = count_error(test_exp, test_result)
-print("Difference(test prediction<--> test expected): ", difference_test)
+print("Difference(test prediction <--> test expected): ", difference_test)
 
 difference_training = count_error(tr_exp, tr_result)
-print("Difference(training prediction<-->training expected): ", difference_training)
+print("Difference(training prediction <-->training expected): ", difference_training)
 #Surface
 #X, Y = np.meshgrid(X,Y)
 #line = ax.plot_surface(X, Y, Z, color='blue')
