@@ -42,7 +42,9 @@ model.compile(loss='mean_squared_error', optimizer='sgd', metrics=['accuracy'])
 
 
 #Prepare training data
-tr_set = (np.random.random((10000))-.5) * 2 * np.pi
+x1 = (np.random.random((5000))-.5) * 2 * np.pi
+x2 = (np.random.random((5000))-.5) * 2 * np.pi
+tr_set = np.coloumn_stack(x1,x2)
 tr_vals = np.column_stack((np.sin(tr_set), np.cos(tr_set)))
 
 
@@ -51,8 +53,8 @@ val_set = (np.random.random((10000))-.5) * 2 * np.pi
 val_vals = np.column_stack((np.sin(val_set), np.cos(val_set)))
 
 #Prepare test data
-tst_set = np.linspace(-np.pi, np.pi, 100)
-test_vals = np.column_stack((np.sin(tst_set), np.cos(tst_set)))
+test_set = np.linspace(-np.pi, np.pi, 100)
+test_vals = np.column_stack((np.sin(test_set), np.cos(test_set)))
 
 
 #Train model
@@ -66,13 +68,13 @@ model.fit(tr_set,
           shuffle= True)
 
 #Predict result
-pred_res = model.predict(tst_set, batch_size=32, verbose=0)
+pred_res = model.predict(test_set, batch_size=32, verbose=0)
 
 #Viszualize prediction <--> expectation
 plt.figure(figsize=(10, 4))
 plt.title('Prediction')
-plt.plot(tst_set,pred_res) 
-plt.plot(tst_set,test_vals) 
+plt.plot(test_set,pred_res) 
+plt.plot(test_set,test_vals) 
 plt.show()
 
 #Viszualize losses
