@@ -6,13 +6,18 @@ from __future__ import print_function
 import numpy as np
 np.random.seed(1337)  # for reproducibility
 
-from keras.datasets import reuters
+from keras.callbacks import EarlyStopping
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
 from keras.utils import np_utils
 from keras.preprocessing.text import Tokenizer
 import os
 import re
+
+
+#Avoid overfitting
+early_stopping = EarlyStopping(monitor='val_loss', patience=4, verbose=1)
+
 
 #Reading poems in and preparing dictionary
 text_all = ''
@@ -30,6 +35,7 @@ text_all = regex.sub('', text_all)
 words = sorted(list(set(text_all.split())))
 dictionary = dict((c, i) for i, c in enumerate(words))
 
+test_poets = []
 
 X_train = []
 y_train = []
@@ -38,6 +44,7 @@ y_test = []
 thir_party_test = []
 petofi_cntr = 0
 vajda_cntr = 0
+balassi_cntr = 0
 
 for poem_name in poems:
     lst_temp = []
@@ -56,18 +63,30 @@ for poem_name in poems:
             y_train.append(0)
             X_train.append(lst_temp)
         else:
+            test_poets.append("Petofi")
             y_test.append(0)
             X_test.append(lst_temp)
-    elif "csokonai" in poem_name:
-        thir_party_test.append(lst_temp)
-    else:
+    elif "vajda" in poem_name:
         vajda_cntr += 1
         if vajda_cntr <= 10:
             y_train.append(1)
             X_train.append(lst_temp)
         else:
+            test_poets.append("Vajda")
             y_test.append(1)
             X_test.append(lst_temp)
+    elif "balassi" in poem_name:
+        balassi_cntr += 1
+        if balassi_cntr <= 10:
+            y_train.append(2)
+            X_train.append(lst_temp)
+        else:
+            test_poets.append("Balassi")
+            y_test.append(2)
+            X_test.append(lst_temp)
+    else:
+        #Csokonai
+        thir_party_test.append(lst_temp)
     
     file.close()
 
@@ -113,9 +132,11 @@ model.compile(loss='binary_crossentropy',
 
 history = model.fit(X_train, Y_train,
                     nb_epoch=nb_epoch, batch_size=batch_size,
-                    verbose=1, validation_split=0.1)
+                    verbose=1, validation_data=(X_test, Y_test), callbacks=[early_stopping])
+
 score = model.evaluate(X_test, Y_test,
                        batch_size=batch_size, verbose=1)
+
 result = model.predict(X_test, verbose = 1)
 result_third_party = model.predict(thir_party_test, verbose = 1)
 print('Test score:', score[0])

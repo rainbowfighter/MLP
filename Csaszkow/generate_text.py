@@ -103,9 +103,7 @@ for iteration in range(60):
         fileOut.write(sentence)
         fileOut.write('\n')
         fileOut.write('Generated: ')
-        fileOut.write(generated)
-
-        
+        fileOut.write(generated)     
 
         for i in range(400):
             x = np.zeros((1, maxlen, len(chars)))
@@ -119,10 +117,8 @@ for iteration in range(60):
             generated += next_char
             sentence = sentence[1:] + next_char
 
-            sys.stdout.write(next_char)
-            
-            fileOut.write(next_char)
-           
+            sys.stdout.write(next_char)        
+            fileOut.write(next_char)       
             sys.stdout.flush()
         print()
 fileOut.close()        
